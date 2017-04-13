@@ -1,4 +1,5 @@
-#Chess
+# Chess
+
 Chess in pygame
 
 Image credit goes to:
