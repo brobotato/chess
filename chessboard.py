@@ -51,3 +51,11 @@ def fill_pieces(color1, color2):
         [7, 6, color1 + 'pawn'],
     ]
     return piece_set
+
+
+def search_piece(coords,color,pieces):
+    piece_set = [piece[0:2] for piece in pieces]
+    if coords in piece_set:
+        if pieces[piece_set.index(coords)][2][0] == color:
+            return piece_set.index(coords)
+    return False
