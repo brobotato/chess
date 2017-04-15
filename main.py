@@ -1,4 +1,4 @@
-import math, os, sys, pygame
+import math, os, sys, pygame, logging
 from pygame.locals import *
 from chessboard import *
 from valid_moves import *
@@ -56,37 +56,58 @@ pieces_last = deepcopy(pieces)
 current_piece = False
 current_player = 0
 players = {0: 'w', 1: 'b'}
+
 check = [0, 0]
 checking_pieces = []
+checked = False
+checkmated = False
+captured = False
 
 moves = []
+moves_formatted = []
 moves_processed = []
+
+logging.basicConfig(filename='GAMES.log', level=logging.DEBUG, format='%(asctime)s %(message)s')
+logging.info(': new game started.')
 
 while not crashed:
     for event in pygame.event.get():
         if event.type == QUIT:
+            logging.info(': game exited.')
             pygame.quit()
             sys.exit()
         if event.type == pygame.MOUSEBUTTONUP:
-            pos = normalize(pygame.mouse.get_pos())
-            if not current_piece:
-                current_piece = search_piece(pos, players[current_player], pieces)
-                if valid_moves(pieces[current_piece], pieces) == []:
+            if not checkmated:
+                pos = normalize(pygame.mouse.get_pos())
+                if not current_piece:
+                    current_piece = search_piece(pos, players[current_player], pieces)
+                    if valid_moves(pieces[current_piece], pieces) == []:
+                        current_piece = False
+                elif current_piece == search_piece(pos, players[current_player], pieces):
                     current_piece = False
-            elif current_piece == search_piece(pos, players[current_player], pieces):
-                current_piece = False
-            elif pos in valid_moves(pieces[current_piece], pieces):
-                pieces[current_piece][0:2] = pos
-                check_collision(pieces, (current_player + 1) % 2)
-                check, checking_pieces = in_check(pieces)
-                if check[current_player]:
-                    pieces = deepcopy(pieces_last)
-                else:
-                    moves.append([pieces[current_piece][2], pos, current_piece])
-                    moves_processed.append(log_moves(moves))
-                    current_player = (current_player + 1) % 2
-                    current_piece = False
-                    pieces_last = deepcopy(pieces)
+                elif pos in valid_moves(pieces[current_piece], pieces):
+                    pieces[current_piece][0:2] = pos
+                    if check_collision(pieces, (current_player + 1) % 2):
+                        captured = True
+                    else:
+                        captured = False
+                    check, checking_pieces = in_check(pieces)
+                    if check[current_player]:
+                        pieces = deepcopy(pieces_last)
+                    else:
+                        if check[(current_player + 1) % 2]:
+                            checked = True
+                            checkmated = in_checkmate(pieces, check)
+                        else:
+                            checked = False
+                        moves.append([pieces[current_piece][2], pos, current_piece])
+                        moves_formatted.append(format_move(moves[-1], captured, checked, checkmated))
+                        moves_processed.append(log_moves(moves_formatted))
+                        if log_moves(moves_formatted):
+                            logging.info(log_moves(moves_formatted))
+                        current_player = (current_player + 1) % 2
+                        current_piece = False
+                        pieces_last = deepcopy(pieces)
     for square in chessboard:
         render(square[0], square[1], square[2], image_dict)
     if current_piece:

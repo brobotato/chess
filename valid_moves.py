@@ -1,4 +1,8 @@
 # return a list of all valid moves
+
+from copy import deepcopy
+
+
 def valid_moves(piece, current_board):
     moves = []
     oob = []
@@ -62,16 +66,52 @@ def valid_moves(piece, current_board):
 
 # check if either king is in check
 def in_check(current_board):
-    white = current_board[17:]
-    black = current_board[1:17]
+    piece_names = [piece[2] for piece in current_board]
+    split = piece_names.index('w_king')
+    white = current_board[split:]
+    black = current_board[1:split]
     white_check, black_check = False, False
     checking_pieces = []
     for piece in white:
-        if black[4][0:2] in valid_moves(piece, current_board):
+        if black[0][0:2] in valid_moves(piece, current_board):
             black_check = True
             checking_pieces.append(current_board.index(piece))
     for piece in black:
-        if white[4][0:2] in valid_moves(piece, current_board):
+        if white[0][0:2] in valid_moves(piece, current_board):
             white_check = True
             checking_pieces.append(current_board.index(piece))
     return [int(white_check), int(black_check)], checking_pieces
+
+
+def in_checkmate(current_board_state, check_status):
+    current_board = deepcopy(current_board_state)
+    piece_names = [piece[2] for piece in current_board]
+    split = piece_names.index('w_king')
+    white = current_board[split:]
+    black = current_board[1:split]
+    if check_status[0]:
+        for piece in white:
+            for move in valid_moves(piece, current_board):
+                temp = deepcopy(piece[0:2])
+                piece[0:2] = move
+                if in_check(current_board)[0][0]:
+                    piece[0:2] = temp
+                    pass
+                else:
+                    piece[0:2] = temp
+                    return False
+        return True
+    elif check_status[1]:
+        for piece in black:
+            for move in valid_moves(piece, current_board):
+                temp = deepcopy(piece[0:2])
+                piece[0:2] = move
+                if in_check(current_board)[0][1]:
+                    piece[0:2] = temp
+                    pass
+                else:
+                    piece[0:2] = temp
+                    return False
+        return True
+    else:
+        return False

@@ -20,11 +20,11 @@ def checker(square1, square2):
 def fill_pieces(color1, color2):
     piece_set = [
         [-100, -100, color2 + 'rook'],
+        [4, 0, color2 + 'king'],
         [0, 0, color2 + 'rook'],
         [1, 0, color2 + 'knight'],
         [2, 0, color2 + 'bishop'],
         [3, 0, color2 + 'queen'],
-        [4, 0, color2 + 'king'],
         [5, 0, color2 + 'bishop'],
         [6, 0, color2 + 'knight'],
         [7, 0, color2 + 'rook'],
@@ -36,11 +36,11 @@ def fill_pieces(color1, color2):
         [5, 1, color2 + 'pawn'],
         [6, 1, color2 + 'pawn'],
         [7, 1, color2 + 'pawn'],
+        [4, 7, color1 + 'king'],
         [0, 7, color1 + 'rook'],
         [1, 7, color1 + 'knight'],
         [2, 7, color1 + 'bishop'],
         [3, 7, color1 + 'queen'],
-        [4, 7, color1 + 'king'],
         [5, 7, color1 + 'bishop'],
         [6, 7, color1 + 'knight'],
         [7, 7, color1 + 'rook'],
@@ -66,8 +66,9 @@ def search_piece(coords, color, pieces):
 
 
 # format a move to algebraic notation
-def format_move(move):
+def format_move(move, capture, check, checkmate):
     formatted_move = ''
+    end = ''
     if 'king' in move[0]:
         formatted_move += 'K'
     elif 'queen' in move[0]:
@@ -80,7 +81,13 @@ def format_move(move):
         formatted_move += 'N'
     elif 'pawn' in move[0]:
         pass
-    formatted_move += ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'][move[1][0]] + str(8 - move[1][1])
+    if capture:
+        formatted_move += 'x'
+    if check:
+        end += '+'
+        if checkmate:
+            end += '+'
+    formatted_move += ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'][move[1][0]] + str(8 - move[1][1]) + end
     return formatted_move
 
 
@@ -88,7 +95,7 @@ def format_move(move):
 def log_moves(move_set):
     if len(move_set) % 2 == 0:
         message = ''
-        message += str(len(move_set) / 2)[:-1] + ' ' + format_move(move_set[-2]) + ' ' + format_move(move_set[-1])
+        message += str(len(move_set) / 2)[:-1] + ' ' + move_set[-2] + ' ' + move_set[-1]
         return (message)
     return ''
 
@@ -108,3 +115,5 @@ def check_collision(current_board, current_player):
                         current_board.remove(piece)
                     elif piece2[2][0] == 'b':
                         current_board.remove(piece2)
+                return True
+    return False
