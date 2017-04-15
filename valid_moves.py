@@ -1,3 +1,4 @@
+# return a list of all valid moves
 def valid_moves(piece, current_board):
     moves = []
     oob = []
@@ -53,7 +54,24 @@ def valid_moves(piece, current_board):
                 else:
                     oob += [[a, b] for a in range(0, move[0]) for b in range(0, move[1])]
     if 'pawn' not in piece[2]:
-        oob += [move[0:2] for move in current_board if (move[2][0] == piece[2][0])]
+        oob += [move[0:2] for move in current_board if move[2][0:2] == piece[2][0:2]]
     else:
         oob += [move[0:2] for move in current_board if move[0] == piece[0]]
     return [move for move in moves if (move in valid and not move in oob)]
+
+
+# check if either king is in check
+def in_check(current_board):
+    white = current_board[17:]
+    black = current_board[1:17]
+    white_check, black_check = False, False
+    checking_pieces = []
+    for piece in white:
+        if black[4][0:2] in valid_moves(piece, current_board):
+            black_check = True
+            checking_pieces.append(current_board.index(piece))
+    for piece in black:
+        if white[4][0:2] in valid_moves(piece, current_board):
+            white_check = True
+            checking_pieces.append(current_board.index(piece))
+    return [int(white_check), int(black_check)], checking_pieces
