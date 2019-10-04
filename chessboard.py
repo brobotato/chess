@@ -16,6 +16,11 @@ def checker(square1, square2):
     return board
 
 
+def upgrade_piece(piece):
+    order = ['_pawn', '_knight', '_bishop', '_rook', '_queen']
+    return order[(order.index(piece) + 1) % 5]
+
+
 # fill the board with pieces
 def fill_pieces(color1, color2):
     piece_set = [
@@ -108,12 +113,20 @@ def check_collision(current_board, current_player):
                 if current_player == 0:
                     if piece[2][0] == 'w':
                         current_board.remove(piece)
+                        if piece2[2][1:] != "_king":
+                            piece2[2] = 'b' + upgrade_piece(piece2[2][1:])
                     elif piece2[2][0] == 'w':
                         current_board.remove(piece2)
+                        if piece[2][1:] != "_king":
+                            piece[2] = 'b' + upgrade_piece(piece[2][1:])
                 if current_player == 1:
                     if piece[2][0] == 'b':
                         current_board.remove(piece)
+                        if piece2[2][1:] != "_king":
+                            piece2[2] = 'w' + upgrade_piece(piece2[2][1:])
                     elif piece2[2][0] == 'b':
                         current_board.remove(piece2)
+                        if piece[2][1:] != "_king":
+                            piece[2] = 'w' + upgrade_piece(piece[2][1:])
                 return True
     return False

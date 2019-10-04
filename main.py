@@ -67,6 +67,8 @@ moves = []
 moves_formatted = []
 moves_processed = []
 
+final_log = True
+
 logging.basicConfig(filename='GAMES.log', level=logging.DEBUG, format='%(asctime)s %(message)s')
 logging.info(': new game started.')
 
@@ -91,6 +93,12 @@ while not crashed:
                         captured = True
                     else:
                         captured = False
+                    if current_player == 0:
+                        if pieces[current_piece][1] == 0:
+                            pieces[current_piece][2] = 'w_queen'
+                    elif current_player == 1:
+                        if pieces[current_piece][1] == 7:
+                            pieces[current_piece][2] = 'b_queen'
                     check, checking_pieces = in_check(pieces)
                     if check[current_player]:
                         pieces = deepcopy(pieces_last)
@@ -108,6 +116,13 @@ while not crashed:
                         current_player = (current_player + 1) % 2
                         current_piece = False
                         pieces_last = deepcopy(pieces)
+        if checkmated and final_log:
+            final_log = False
+            moves.append([pieces[current_piece][2], pos, current_piece])
+            moves_formatted.append(format_move(moves[-1], captured, checked, checkmated))
+            moves_processed.append(log_moves(moves_formatted))
+            if log_moves(moves_formatted):
+                logging.info(log_moves(moves_formatted))
     for square in chessboard:
         render(square[0], square[1], square[2], image_dict)
     if current_piece:
